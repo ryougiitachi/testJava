@@ -19,6 +19,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import per.itachi.test.inherit.TestInheritLvl1;
+import per.itachi.test.inherit.TestInheritLvl2;
+import per.itachi.test.inherit.TestInheritLvl3;
+
 public class TestingCases {
 	
 	private final static Log log = LogFactory.getLog(TestingCases.class);
@@ -50,7 +54,12 @@ public class TestingCases {
 		case 3:
 			testCharset();
 			break;
-
+		case 4:
+			testArray();
+			break;
+		case 5:
+			testInherit();
+			break;
 		default:
 			break;
 		}
@@ -184,5 +193,48 @@ public class TestingCases {
 		log.debug(String.format("Determine whether or not to support charset is %s", mapCharsets.get("utf-8")));
 		log.debug(String.format("Determine whether or not to support charset is %s", mapCharsets.get("UTF-8")));
 		log.debug(String.format("The default charset is %s", Charset.defaultCharset()));
+	}
+	
+	/**
+	 * 4
+	 * */
+	private static void testArray() {
+		int[] src = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+		int[] des = new int[]{0, 0, 0, 0, 0};
+		System.arraycopy(src, 0, des, 0, src.length);	//ArrayIndexOutOfBoundsException if parameter length > des.length 
+		log.debug(String.format("List is %s", des[4]));
+	}
+	
+	/**
+	 * 5
+	 * */
+	private static void testInherit() {
+		TestInheritLvl1 p1lvl1=null, p1lvl2=null, p1lvl3=null;
+		TestInheritLvl2 p2lvl2;
+		TestInheritLvl3 p3lvl3;
+		
+		log.debug(String.format("Initialising p1lvl1, p1lvl2, p1lvl3... "));
+		p1lvl1=new TestInheritLvl1();
+		p2lvl2=new TestInheritLvl2();
+		p3lvl3=new TestInheritLvl3();
+		
+		p1lvl2=p2lvl2; 
+		p1lvl3=p3lvl3;
+		log.debug(String.format("Complete initialising p1lvl1, p1lvl2, p1lvl3."));
+		
+		log.debug(String.format("The protect result of TestInheritLvl1 is %d", p1lvl1.getProtectNumber()));
+		log.debug(String.format("The protect result of TestInheritLvl2 is %d", p1lvl2.getProtectNumber()));
+		log.debug(String.format("The protect result of TestInheritLvl3 is %d", p1lvl3.getProtectNumber()));
+		log.debug(String.format("The public result of TestInheritLvl1 is %d", p1lvl1.publicNumber));
+		log.debug(String.format("The public result of TestInheritLvl1 is %d", p1lvl2.publicNumber));
+		log.debug(String.format("The public result of TestInheritLvl1 is %d", p1lvl3.publicNumber));
+		log.debug(String.format("The public result of TestInheritLvl2 is %d", p2lvl2.publicNumber));
+		log.debug(String.format("The public result of TestInheritLvl3 is %d", p3lvl3.publicNumber));
+		
+		log.debug(String.format("Complete testing p1lvl1, p1lvl2, p1lvl3."));
+		p1lvl1=null;
+		p1lvl2=null;
+		p1lvl3=null;
+//		System.gc();
 	}
 }
