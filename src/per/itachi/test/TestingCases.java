@@ -9,11 +9,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -59,6 +62,9 @@ public class TestingCases {
 			break;
 		case 5:
 			testInherit();
+			break;
+		case 6:
+			testDate();
 			break;
 		default:
 			break;
@@ -236,5 +242,36 @@ public class TestingCases {
 		p1lvl2=null;
 		p1lvl3=null;
 //		System.gc();
+	}
+	
+	/**
+	 * 6
+	 * */
+	private static void testDate() {
+		DateFormat sdf = new SimpleDateFormat("GG yyyy-MM-dd HH:mm:ss", Locale.UK);
+		long ltimeBC = 0;
+		long ltimeAD = 0;
+		Date dateBC = null;
+		Date dateAD = null;
+		Date dateTemp = new Date(-62135596800000l);
+		Calendar calendar = Calendar.getInstance();
+		log.debug(String.format("The default locale is %s", Locale.getDefault()));
+		log.debug(String.format("The default time zone is %s", TimeZone.getDefault()));
+		try {
+			dateBC = sdf.parse("BC 0001-02-29 00:00:51");
+			dateAD = sdf.parse("AD 0001-01-01 08:00:00");
+			calendar.setTime(dateAD);
+			ltimeBC = dateBC.getTime();
+			ltimeAD = dateAD.getTime();
+//			ltimeAD = sdf.parse("AD 0000-00-00 00:00:00").getTime();
+			log.debug(String.format("The value of date bc is %d", ltimeBC));
+//			log.debug(String.format("The value of week bc is %d", ltimeBC));
+			log.debug(String.format("The value of date ad is %d", ltimeAD));
+			log.debug(String.format("The value of week ad is %d", calendar.get(Calendar.DAY_OF_WEEK)));
+			log.debug(String.format("The value of dateTemp is %s", sdf.format(dateTemp)));
+		} 
+		catch (ParseException e) {
+			log.error(e.getMessage(), e);
+		}
 	}
 }
