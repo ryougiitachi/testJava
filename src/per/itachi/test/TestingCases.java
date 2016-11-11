@@ -214,7 +214,7 @@ public class TestingCases {
 	/**
 	 * 5
 	 * */
-	private static void testInherit() {
+	static void testInherit() {
 		TestInheritLvl1 p1lvl1=null, p1lvl2=null, p1lvl3=null;
 		TestInheritLvl2 p2lvl2;
 		TestInheritLvl3 p3lvl3;
@@ -247,27 +247,37 @@ public class TestingCases {
 	/**
 	 * 6
 	 * */
-	private static void testDate() {
+	protected static void testDate() {
 		DateFormat sdf = new SimpleDateFormat("GG yyyy-MM-dd HH:mm:ss", Locale.UK);
 		long ltimeBC = 0;
 		long ltimeAD = 0;
 		Date dateBC = null;
 		Date dateAD = null;
-		Date dateTemp = new Date(-62135596800000l);
-		Calendar calendar = Calendar.getInstance();
+		Date dateTemp = new Date(-62135798400000l);
+		Calendar calendarAD = Calendar.getInstance();
 		log.debug(String.format("The default locale is %s", Locale.getDefault()));
 		log.debug(String.format("The default time zone is %s", TimeZone.getDefault()));
+		log.debug(String.format("The class name of calendar is %s", calendarAD.getClass()));
 		try {
 			dateBC = sdf.parse("BC 0001-02-29 00:00:51");
 			dateAD = sdf.parse("AD 0001-01-01 08:00:00");
-			calendar.setTime(dateAD);
+			calendarAD.setTime(dateAD);
+			calendarAD.set(Calendar.YEAR, 1);
+			calendarAD.set(Calendar.MONTH, Calendar.JANUARY);
+			calendarAD.set(Calendar.DAY_OF_MONTH, 1);
+			calendarAD.set(Calendar.HOUR_OF_DAY, 0);
+			calendarAD.set(Calendar.MINUTE, 0);
+			calendarAD.set(Calendar.SECOND, 0);
+			calendarAD.set(Calendar.MILLISECOND, 0);
 			ltimeBC = dateBC.getTime();
 			ltimeAD = dateAD.getTime();
 //			ltimeAD = sdf.parse("AD 0000-00-00 00:00:00").getTime();
 			log.debug(String.format("The value of date bc is %d", ltimeBC));
 //			log.debug(String.format("The value of week bc is %d", ltimeBC));
 			log.debug(String.format("The value of date ad is %d", ltimeAD));
-			log.debug(String.format("The value of week ad is %d", calendar.get(Calendar.DAY_OF_WEEK)));
+			log.debug(String.format("The value of era ad is %d", calendarAD.get(Calendar.ERA)));
+			log.debug(String.format("The value of week ad is %d", calendarAD.get(Calendar.DAY_OF_WEEK)));
+			log.debug(String.format("The value of calendar date ad is %d", calendarAD.getTimeInMillis()));
 			log.debug(String.format("The value of dateTemp is %s", sdf.format(dateTemp)));
 		} 
 		catch (ParseException e) {
