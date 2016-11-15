@@ -67,12 +67,14 @@ public class TestingCases {
 		case 6:
 			testDate();
 			break;
+		case 7:
+			testFinal();
+			break;
 		case 8:
 			testOverflow();
 			break;
 		case 9:
 			testSearchString();
-			break;
 		default:
 			break;
 		}
@@ -295,6 +297,16 @@ public class TestingCases {
 		catch (ParseException e) {
 			log.error(e.getMessage(), e);
 		}
+	}
+	
+	/**
+	 * 7
+	 * */
+	static void testFinal() {
+		final StringBuilder builder = new StringBuilder();
+		builder.append("It seems that final won't forbid changing object member value, ");
+		builder.append(true);
+		log.debug(builder.toString());
 	}
 	
 	/**
