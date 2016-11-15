@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -258,11 +259,12 @@ public class TestingCases {
 		Date dateAD = null;
 		Date dateTemp = new Date(-62135596800000l);
 		Calendar calendar = Calendar.getInstance();
+		GregorianCalendar gre = (GregorianCalendar)calendar;
 		log.debug(String.format("The default locale is %s", Locale.getDefault()));
 		log.debug(String.format("The default time zone is %s", TimeZone.getDefault()));
 		try {
 			dateBC = sdf.parse("BC 0001-02-29 00:00:51");
-			dateAD = sdf.parse("AD 0001-01-01 08:00:00");
+			dateAD = sdf.parse("AD 1500-01-01 08:00:00");
 			calendar.setTime(dateAD);
 			ltimeBC = dateBC.getTime();
 			ltimeAD = dateAD.getTime();
@@ -272,6 +274,8 @@ public class TestingCases {
 			log.debug(String.format("The value of date ad is %d", ltimeAD));
 			log.debug(String.format("The value of week ad is %d", calendar.get(Calendar.DAY_OF_WEEK)));
 			log.debug(String.format("The value of dateTemp is %s", sdf.format(dateTemp)));
+			log.debug(String.format("The date of Gregorian Calendar change is %s", sdf.format(gre.getGregorianChange())));
+			log.debug(String.format("The date of Gregorian Calendar change is %d", gre.getGregorianChange().getTime()));
 		} 
 		catch (ParseException e) {
 			log.error(e.getMessage(), e);
