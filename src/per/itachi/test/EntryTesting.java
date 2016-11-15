@@ -14,6 +14,7 @@ public class EntryTesting {
 		if (args.length >= 1) {
 			TestingCases.manageTestingCases(args);
 		}
-		
+//		TestingCases.testInherit();//correct
+//		TestingCases.testDate();//correct
 	}
 }

@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import per.itachi.test.inherit.TestInheritLvl1;
 import per.itachi.test.inherit.TestInheritLvl2;
 import per.itachi.test.inherit.TestInheritLvl3;
+import per.itachi.test.util.StringUtil;
 
 public class TestingCases {
 	
@@ -70,6 +71,11 @@ public class TestingCases {
 		case 7:
 			testFinal();
 			break;
+		case 8:
+			testOverflow();
+			break;
+		case 9:
+			testSearchString();
 		default:
 			break;
 		}
@@ -218,7 +224,7 @@ public class TestingCases {
 	/**
 	 * 5
 	 * */
-	private static void testInherit() {
+	static void testInherit() {
 		TestInheritLvl1 p1lvl1=null, p1lvl2=null, p1lvl3=null;
 		TestInheritLvl2 p2lvl2;
 		TestInheritLvl3 p3lvl3;
@@ -251,28 +257,43 @@ public class TestingCases {
 	/**
 	 * 6
 	 * */
-	private static void testDate() {
+	protected static void testDate() {
 		DateFormat sdf = new SimpleDateFormat("GG yyyy-MM-dd HH:mm:ss", Locale.UK);
 		long ltimeBC = 0;
 		long ltimeAD = 0;
 		Date dateBC = null;
 		Date dateAD = null;
-		Date dateTemp = new Date(-62135596800000l);
-		Calendar calendar = Calendar.getInstance();
-		GregorianCalendar gre = (GregorianCalendar)calendar;
+		Date dateTemp = new Date(-62135798400000l);
+		TimeZone tz = TimeZone.getDefault();
+		Calendar calendarAD = Calendar.getInstance();
+		GregorianCalendar gre = (GregorianCalendar)calendarAD;
 		log.debug(String.format("The default locale is %s", Locale.getDefault()));
-		log.debug(String.format("The default time zone is %s", TimeZone.getDefault()));
+		log.debug(String.format("The default time zone is %s", tz));
+		log.debug(String.format("The default time zone class name is %s", tz.getClass()));
+		log.debug(String.format("The class name of calendar is %s", calendarAD.getClass()));
 		try {
 			dateBC = sdf.parse("BC 0001-02-29 00:00:51");
 			dateAD = sdf.parse("AD 1500-01-01 08:00:00");
-			calendar.setTime(dateAD);
+			calendarAD.setTime(dateAD);
+			calendarAD.set(Calendar.YEAR, 4);
+			calendarAD.set(Calendar.MONTH, Calendar.FEBRUARY);
+			calendarAD.set(Calendar.DAY_OF_MONTH, 29);
+			calendarAD.set(Calendar.HOUR_OF_DAY, 0);
+			calendarAD.set(Calendar.MINUTE, 0);
+			calendarAD.set(Calendar.SECOND, 0);
+			calendarAD.set(Calendar.MILLISECOND, 0);
 			ltimeBC = dateBC.getTime();
 			ltimeAD = dateAD.getTime();
 //			ltimeAD = sdf.parse("AD 0000-00-00 00:00:00").getTime();
 			log.debug(String.format("The value of date bc is %d", ltimeBC));
 //			log.debug(String.format("The value of week bc is %d", ltimeBC));
 			log.debug(String.format("The value of date ad is %d", ltimeAD));
-			log.debug(String.format("The value of week ad is %d", calendar.get(Calendar.DAY_OF_WEEK)));
+			log.debug(String.format("The value of ad is %s", sdf.format(calendarAD.getTime())));
+			log.debug(String.format("The value of era ad is %d", calendarAD.get(Calendar.ERA)));
+			log.debug(String.format("The value of week ad is %d", calendarAD.get(Calendar.DAY_OF_WEEK)));
+			log.debug(String.format("The value of time zone offset ad is %d", calendarAD.get(Calendar.ZONE_OFFSET)));
+			log.debug(String.format("The value of time DST offset ad is %d", calendarAD.get(Calendar.DST_OFFSET)));
+			log.debug(String.format("The value of calendar date ad is %d", calendarAD.getTimeInMillis()));
 			log.debug(String.format("The value of dateTemp is %s", sdf.format(dateTemp)));
 			log.debug(String.format("The date of Gregorian Calendar change is %s", sdf.format(gre.getGregorianChange())));
 			log.debug(String.format("The date of Gregorian Calendar change is %d", gre.getGregorianChange().getTime()));
@@ -282,10 +303,58 @@ public class TestingCases {
 		}
 	}
 	
+	/**
+	 * 7
+	 * */
 	static void testFinal() {
 		final StringBuilder builder = new StringBuilder();
 		builder.append("It seems that final won't forbid changing object member value, ");
 		builder.append(true);
 		log.debug(builder.toString());
+	}
+	
+	/**
+	 * 8
+	 * */
+	static void testOverflow() {
+		int i = Integer.MAX_VALUE;
+		long l = Long.MAX_VALUE;
+		log.debug(String.format("The value of int is %d", i));
+		log.debug(String.format("The overflow of int is %d", ++i));
+		log.debug(String.format("The overflow of int is %d", Integer.MAX_VALUE + 1));
+		log.debug(String.format("The overflow of int is %d", Integer.MAX_VALUE + 1l));
+		log.debug(String.format("The value of long is %d", l));
+		log.debug(String.format("The overflow of long is %d", ++l));
+		log.debug(String.format("The overflow of long is %d", Long.MAX_VALUE + 1));
+	}
+	
+	/**
+	 * 9
+	 * */
+	static void testSearchString() {
+		String strMain = "ababxbababcabfdsss";
+		String strPattern = "abfdsss";
+		int i, count;
+		long ltimeStart, ltimeEnd;
+		count = 1000000;
+		//In this case, BF is more efficient than KMP. 
+		//KMP
+		ltimeStart = System.currentTimeMillis();
+		for (i=0; i < count; ++i) {
+			StringUtil.searchSubstrByKMP(strMain, strPattern);
+		}
+		ltimeEnd = System.currentTimeMillis();
+		log.debug(String.format("The duration is %d, start is %d, end is %d", 
+				ltimeEnd - ltimeStart, ltimeStart, ltimeEnd));
+		log.debug(String.format("The position is %d", StringUtil.searchSubstrByKMP(strMain, strPattern)));
+		//BF
+		ltimeStart = System.currentTimeMillis();
+		for (i=0; i < count; ++i) {
+			strMain.indexOf(strPattern);
+		}
+		ltimeEnd = System.currentTimeMillis();
+		log.debug(String.format("The duration is %d, start is %d, end is %d", 
+				ltimeEnd - ltimeStart, ltimeStart, ltimeEnd));
+		log.debug(String.format("The position is %d", strMain.indexOf(strPattern)));
 	}
 }
