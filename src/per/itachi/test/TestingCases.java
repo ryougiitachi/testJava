@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import per.itachi.test.inherit.TestInheritLvl1;
 import per.itachi.test.inherit.TestInheritLvl2;
 import per.itachi.test.inherit.TestInheritLvl3;
+import per.itachi.test.util.StringUtil;
 
 public class TestingCases {
 	
@@ -65,6 +66,12 @@ public class TestingCases {
 			break;
 		case 6:
 			testDate();
+			break;
+		case 8:
+			testOverflow();
+			break;
+		case 9:
+			testSearchString();
 			break;
 		default:
 			break;
@@ -254,17 +261,19 @@ public class TestingCases {
 		Date dateBC = null;
 		Date dateAD = null;
 		Date dateTemp = new Date(-62135798400000l);
+		TimeZone tz = TimeZone.getDefault();
 		Calendar calendarAD = Calendar.getInstance();
 		log.debug(String.format("The default locale is %s", Locale.getDefault()));
-		log.debug(String.format("The default time zone is %s", TimeZone.getDefault()));
+		log.debug(String.format("The default time zone is %s", tz));
+		log.debug(String.format("The default time zone class name is %s", tz.getClass()));
 		log.debug(String.format("The class name of calendar is %s", calendarAD.getClass()));
 		try {
 			dateBC = sdf.parse("BC 0001-02-29 00:00:51");
 			dateAD = sdf.parse("AD 0001-01-01 08:00:00");
 			calendarAD.setTime(dateAD);
-			calendarAD.set(Calendar.YEAR, 1);
-			calendarAD.set(Calendar.MONTH, Calendar.JANUARY);
-			calendarAD.set(Calendar.DAY_OF_MONTH, 1);
+			calendarAD.set(Calendar.YEAR, 4);
+			calendarAD.set(Calendar.MONTH, Calendar.FEBRUARY);
+			calendarAD.set(Calendar.DAY_OF_MONTH, 29);
 			calendarAD.set(Calendar.HOUR_OF_DAY, 0);
 			calendarAD.set(Calendar.MINUTE, 0);
 			calendarAD.set(Calendar.SECOND, 0);
@@ -275,13 +284,61 @@ public class TestingCases {
 			log.debug(String.format("The value of date bc is %d", ltimeBC));
 //			log.debug(String.format("The value of week bc is %d", ltimeBC));
 			log.debug(String.format("The value of date ad is %d", ltimeAD));
+			log.debug(String.format("The value of ad is %s", sdf.format(calendarAD.getTime())));
 			log.debug(String.format("The value of era ad is %d", calendarAD.get(Calendar.ERA)));
 			log.debug(String.format("The value of week ad is %d", calendarAD.get(Calendar.DAY_OF_WEEK)));
+			log.debug(String.format("The value of time zone offset ad is %d", calendarAD.get(Calendar.ZONE_OFFSET)));
+			log.debug(String.format("The value of time DST offset ad is %d", calendarAD.get(Calendar.DST_OFFSET)));
 			log.debug(String.format("The value of calendar date ad is %d", calendarAD.getTimeInMillis()));
 			log.debug(String.format("The value of dateTemp is %s", sdf.format(dateTemp)));
 		} 
 		catch (ParseException e) {
 			log.error(e.getMessage(), e);
 		}
+	}
+	
+	/**
+	 * 8
+	 * */
+	static void testOverflow() {
+		int i = Integer.MAX_VALUE;
+		long l = Long.MAX_VALUE;
+		log.debug(String.format("The value of int is %d", i));
+		log.debug(String.format("The overflow of int is %d", ++i));
+		log.debug(String.format("The overflow of int is %d", Integer.MAX_VALUE + 1));
+		log.debug(String.format("The overflow of int is %d", Integer.MAX_VALUE + 1l));
+		log.debug(String.format("The value of long is %d", l));
+		log.debug(String.format("The overflow of long is %d", ++l));
+		log.debug(String.format("The overflow of long is %d", Long.MAX_VALUE + 1));
+	}
+	
+	/**
+	 * 9
+	 * */
+	static void testSearchString() {
+		String strMain = "ababxbababcabfdsss";
+		String strPattern = "abfdsss";
+		int i, count;
+		long ltimeStart, ltimeEnd;
+		count = 1000000;
+		//In this case, BF is more efficient than KMP. 
+		//KMP
+		ltimeStart = System.currentTimeMillis();
+		for (i=0; i < count; ++i) {
+			StringUtil.searchSubstrByKMP(strMain, strPattern);
+		}
+		ltimeEnd = System.currentTimeMillis();
+		log.debug(String.format("The duration is %d, start is %d, end is %d", 
+				ltimeEnd - ltimeStart, ltimeStart, ltimeEnd));
+		log.debug(String.format("The position is %d", StringUtil.searchSubstrByKMP(strMain, strPattern)));
+		//BF
+		ltimeStart = System.currentTimeMillis();
+		for (i=0; i < count; ++i) {
+			strMain.indexOf(strPattern);
+		}
+		ltimeEnd = System.currentTimeMillis();
+		log.debug(String.format("The duration is %d, start is %d, end is %d", 
+				ltimeEnd - ltimeStart, ltimeStart, ltimeEnd));
+		log.debug(String.format("The position is %d", strMain.indexOf(strPattern)));
 	}
 }
