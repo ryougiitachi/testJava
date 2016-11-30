@@ -1,5 +1,6 @@
 package per.itachi.test;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -88,6 +90,9 @@ public class TestingCases {
 			break;
 		case 11:
 			testGenRandomPasswd();
+			break;
+		case 13:
+			testStream();
 			break;
 		default:
 			break;
@@ -509,5 +514,46 @@ public class TestingCases {
 		}
 		
 		return strbuilderPassword.toString();
+	}
+	
+	/**
+	 * 13
+	 * */
+	static void testStream() {
+		InputStream fis = null;
+		InputStream bis = null;
+		Scanner scanner = null;
+		try {
+			fis = new FileInputStream("etc/log4j.xml");
+			bis = new BufferedInputStream(fis);
+			scanner = new Scanner(bis);
+		} 
+		catch (FileNotFoundException e) {
+			log.error(e.getMessage(), e);
+		}
+		finally {
+			if (scanner != null) {
+				scanner.close();//all the streams will be closed at this step. 
+				scanner = null;
+			}
+			if (bis != null) {
+				try {
+					bis.close();
+				} 
+				catch (IOException e) {
+					log.error(e.getMessage(), e);
+				}
+				bis = null;
+			}
+			if (fis != null) {
+				try {
+					fis.close();
+				} 
+				catch (IOException e) {
+					log.error(e.getMessage(), e);
+				}
+				fis = null;
+			}
+		}
 	}
 }
