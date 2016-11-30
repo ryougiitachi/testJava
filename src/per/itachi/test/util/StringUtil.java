@@ -5,7 +5,7 @@ public class StringUtil {
 	/**
 	 * version 1
 	 * */
-	private static void getNextByKMP(CharSequence sub, int[] next) {
+	public static void getNextByKMP(CharSequence sub, int[] next) {
 		if (sub == null || sub.length() == 0) {
 			return;
 		}
@@ -27,7 +27,7 @@ public class StringUtil {
 			}
 			//matching
 			if (sub.charAt(curPos) == sub.charAt(k)) {
-				++curPos;
+				++k;
 			}
 			next[curPos] = k;
 		}
@@ -36,22 +36,22 @@ public class StringUtil {
 	/**
 	 * version 2
 	 * */
-	private static int[] getNextByKMP(CharSequence sub) {
+	public static int[] getNextByKMP(CharSequence sub) {
 		if (sub == null || sub.length() == 0) {
 			return null;
 		}
 		int lengthSub = sub.length();
 		int[] next = new int[lengthSub];
 		int i = 0;
-		int k = -1;
-		next[0] = -1;
-		while(i < sub.length() - 1) {
-			if (k == -1 || sub.charAt(i) == sub.charAt(k)) {
+		int k = 0;
+		next[0] = 0;
+		while(i < lengthSub - 1) {//i < lengthSub - 1 ?
+			if (k == 0 || sub.charAt(i) == sub.charAt(k)) {
 				++i;
 				++k;
 				next[i] = k;
 			} 
-			else {
+			else {//non-matching and try to find smaller matching
 				k = next[k];
 			}
 		}
@@ -59,9 +59,10 @@ public class StringUtil {
 	}
 	
 	/**
-	 * return index of substring when it is matched at first time. 
+	 * return index of substring when it is matched at first time.
+	 * @param version	1 and 2 currently 
 	 * */
-	public static int searchSubstrByKMP(CharSequence main, CharSequence sub) {
+	public static int searchSubstrByKMP(CharSequence main, CharSequence sub, int version) {
 		if (main == null || main.length() == 0) {
 			return -1;
 		}
@@ -77,11 +78,21 @@ public class StringUtil {
 		int lengthSub = sub.length();
 		int[] next = null;
 		//prepare next array. 
-		next = new int[lengthSub];
-		getNextByKMP(sub, next);
-//		if (next == null) {
-//			return -1;
-//		}
+		switch (version) {
+		case 1:
+			next = new int[lengthSub];
+			getNextByKMP(sub, next);
+			break;
+		case 2:
+			next = getNextByKMP(sub);
+			break;
+		default:
+			next = getNextByKMP(sub);
+			break;
+		}
+		if (next == null) {
+			return -1;
+		}
 		//start to search
 		for(i = 0, q = 0; i < lengthMain; ++i) {
 			//move pattern if not equal

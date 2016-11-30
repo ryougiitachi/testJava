@@ -11,12 +11,16 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -32,6 +36,8 @@ public class TestingCases {
 	
 	private final static Log log = LogFactory.getLog(TestingCases.class);
 //	private final static Logger logger = Logger.getLogger(TestingCases.class);
+	
+	private static final Formatter formatter = new Formatter();
 	
 	public static void manageTestingCases(String[] args) {
 		if (args.length <= 0) {
@@ -76,6 +82,13 @@ public class TestingCases {
 			break;
 		case 9:
 			testSearchString();
+			break;
+		case 10:
+			testBasicInfo();
+			break;
+		case 11:
+			testGenRandomPasswd();
+			break;
 		default:
 			break;
 		}
@@ -273,9 +286,9 @@ public class TestingCases {
 		log.debug(String.format("The class name of calendar is %s", calendarAD.getClass()));
 		try {
 			dateBC = sdf.parse("BC 0001-02-29 00:00:51");
-			dateAD = sdf.parse("AD 1500-01-01 08:00:00");
+			dateAD = sdf.parse("AD 2000-02-29 08:00:00");
 			calendarAD.setTime(dateAD);
-			calendarAD.set(Calendar.YEAR, 4);
+			calendarAD.set(Calendar.YEAR, 2000);
 			calendarAD.set(Calendar.MONTH, Calendar.FEBRUARY);
 			calendarAD.set(Calendar.DAY_OF_MONTH, 29);
 			calendarAD.set(Calendar.HOUR_OF_DAY, 0);
@@ -335,18 +348,46 @@ public class TestingCases {
 		String strMain = "ababxbababcabfdsss";
 		String strPattern = "abfdsss";
 		int i, count;
+		int versionKMP = 1;
+		int[] next = new int[strPattern.length()];
+		StringBuilder builder = new StringBuilder(128);
 		long ltimeStart, ltimeEnd;
 		count = 1000000;
 		//In this case, BF is more efficient than KMP. 
-		//KMP
+		//version 1 is more efficient than version 2. version 2 is wrong ? 
+		//KMP next array
+		StringUtil.getNextByKMP("abcdabd", next);//version 1
+		for(i=0; i < next.length; ++i){
+			builder.append(next[i]).append(' ');
+		}
+		log.debug(builder);
+		builder.setLength(0);
+		next = StringUtil.getNextByKMP("abcdabd");//version 2
+		for(i=0; i < next.length; ++i){
+			builder.append(next[i]).append(' ');
+		}
+		log.debug(builder);
+		builder.setLength(0);
+		//KMP version 1
+		versionKMP = 1;
 		ltimeStart = System.currentTimeMillis();
 		for (i=0; i < count; ++i) {
-			StringUtil.searchSubstrByKMP(strMain, strPattern);
+			StringUtil.searchSubstrByKMP(strMain, strPattern, versionKMP);
 		}
 		ltimeEnd = System.currentTimeMillis();
 		log.debug(String.format("The duration is %d, start is %d, end is %d", 
 				ltimeEnd - ltimeStart, ltimeStart, ltimeEnd));
-		log.debug(String.format("The position is %d", StringUtil.searchSubstrByKMP(strMain, strPattern)));
+		log.debug(String.format("The position is %d", StringUtil.searchSubstrByKMP(strMain, strPattern, versionKMP)));
+		//KMP version 2
+		versionKMP = 2;
+		ltimeStart = System.currentTimeMillis();
+		for (i=0; i < count; ++i) {
+			StringUtil.searchSubstrByKMP(strMain, strPattern, versionKMP);
+		}
+		ltimeEnd = System.currentTimeMillis();
+		log.debug(String.format("The duration is %d, start is %d, end is %d", 
+				ltimeEnd - ltimeStart, ltimeStart, ltimeEnd));
+		log.debug(String.format("The position is %d", StringUtil.searchSubstrByKMP(strMain, strPattern, versionKMP)));
 		//BF
 		ltimeStart = System.currentTimeMillis();
 		for (i=0; i < count; ++i) {
@@ -356,5 +397,117 @@ public class TestingCases {
 		log.debug(String.format("The duration is %d, start is %d, end is %d", 
 				ltimeEnd - ltimeStart, ltimeStart, ltimeEnd));
 		log.debug(String.format("The position is %d", strMain.indexOf(strPattern)));
+	}
+	
+	/**
+	 * 10
+	 * */
+	static void testBasicInfo() {
+		Runtime runtime = Runtime.getRuntime();
+		log.debug(formatter.format("The number of available processors is %d", runtime.availableProcessors()));
+	}
+	
+	/**
+	 * 11 Generate random passcode. 
+	 * */
+	static void testGenRandomPasswd() {
+		int i, count;
+		count = 6;
+		for (i=0; i < count; ++i) {
+			log.info(genRandomPasscode(8));
+			
+			try {
+				Thread.sleep(10l);
+			} 
+			catch (InterruptedException e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+	}
+	
+	/**
+	 * Generate random passcode. 
+	 * */
+	private static String genRandomPasscode(int passwordLength) {
+		if (passwordLength < 8) {
+			return null;
+		}
+		
+		String strPassword = null;
+		StringBuilder strbuilderPassword;
+		strbuilderPassword = new StringBuilder(passwordLength);
+		
+		int i, length, index;
+		
+		List<Character> listUpper;
+		List<Character> listLower;
+		List<Character> listNumeric;
+		List<Character> listSpecchar;
+		List<Character> listAll;
+		Random random;
+		boolean hasUpper	= false;
+		boolean hasLower	= false;
+		boolean hasNumeric	= false;
+		boolean hasSpecchar	= false;
+		
+		listUpper		= new ArrayList<Character>(32);
+		listLower		= new ArrayList<Character>(32);
+		listNumeric		= new ArrayList<Character>(32);
+		listSpecchar	= new ArrayList<Character>(32);
+		listAll			= new ArrayList<Character>(80);
+		random = new Random(System.currentTimeMillis());
+		
+		//initialise the sequences of elements. 
+		for (i=0; i < TestingConst.ELEMENT_STR_UPPER.length(); ++i) {
+			listUpper.add(TestingConst.ELEMENT_STR_UPPER.charAt(i));
+			listAll.add(TestingConst.ELEMENT_STR_UPPER.charAt(i));
+		}
+		for (i=0; i < TestingConst.ELEMENT_STR_LOWER.length(); ++i) {
+			listLower.add(TestingConst.ELEMENT_STR_LOWER.charAt(i));
+			listAll.add(TestingConst.ELEMENT_STR_LOWER.charAt(i));
+		}
+		for (i=0; i < TestingConst.ELEMENT_STR_NUMERIC.length(); ++i) {
+			listNumeric.add(TestingConst.ELEMENT_STR_NUMERIC.charAt(i));
+			listAll.add(TestingConst.ELEMENT_STR_NUMERIC.charAt(i));
+		}
+		for (i=0; i < TestingConst.ELEMENT_STR_SPECCHAR.length(); ++i) {
+			listSpecchar.add(TestingConst.ELEMENT_STR_SPECCHAR.charAt(i));
+			listAll.add(TestingConst.ELEMENT_STR_SPECCHAR.charAt(i));
+		}
+		
+		//
+		if (!hasUpper) {
+			index = random.nextInt() % listUpper.size();
+//			strbuilderPassword.append(listUpper.get(random.nextInt(listUpper.size())));
+			strbuilderPassword.append(listUpper.get(index >= 0 ? index : -index));
+			hasUpper = true;
+		}
+		if (!hasLower) {
+			index = random.nextInt() % listLower.size();
+//			strbuilderPassword.append(listLower.get(random.nextInt(listLower.size())));
+			strbuilderPassword.append(listLower.get(index >= 0 ? index : -index));
+			hasLower = true;
+		}
+		if (!hasNumeric) {
+			index = random.nextInt() % listNumeric.size();
+//			strbuilderPassword.append(listNumeric.get(random.nextInt(listNumeric.size())));
+			strbuilderPassword.append(listNumeric.get(index >= 0 ? index : -index));
+			hasNumeric = true;
+		}
+		if (!hasSpecchar) {
+			index = random.nextInt() % listSpecchar.size();
+//			strbuilderPassword.append(listSpecchar.get(random.nextInt(listSpecchar.size())));
+			strbuilderPassword.append(listSpecchar.get(index >= 0 ? index : -index));
+			hasSpecchar = true;
+		}
+		
+		//
+		for (i=4; i < passwordLength; ++i) {
+			index = random.nextInt() % listAll.size();
+//			strbuilderPassword.append(listAll.get(random.nextInt(listAll.size())));
+			strbuilderPassword.append(listAll.get(index >= 0 ? index : -index));
+		}
+		
+		return strbuilderPassword.toString();
 	}
 }
