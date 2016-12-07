@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -76,6 +77,13 @@ public class TestingCases {
 			break;
 		case 9:
 			testSearchString();
+			break;
+		case 11:
+			testDouble();
+			break;
+		case 12:
+			testRandomAccessFile();
+			break;
 		default:
 			break;
 		}
@@ -356,5 +364,87 @@ public class TestingCases {
 		log.debug(String.format("The duration is %d, start is %d, end is %d", 
 				ltimeEnd - ltimeStart, ltimeStart, ltimeEnd));
 		log.debug(String.format("The position is %d", strMain.indexOf(strPattern)));
+	}
+	
+	/**
+	 * 11
+	 * */
+	static void testDouble() {
+		double d = 1.0;
+		long ldouble = Double.doubleToLongBits(d);
+		long rawldouble = Double.doubleToRawLongBits(d);
+		log.debug(String.format("The value of doubleToLongBits is %d", ldouble));
+		log.debug(String.format("The value of doubleToLongBits is %016X", ldouble));
+		log.debug(String.format("The value of doubleToLongBits is %s", Double.toHexString(d)));
+		log.debug(String.format("The value of doubleToRawLongBits is %d", rawldouble));
+		log.debug(String.format("The value of doubleToRawLongBits is %016X", rawldouble));
+		long l = 1l;
+		double dlong = Double.longBitsToDouble(l);
+		log.debug(String.format("The value of longBitsToDouble is %f", dlong));
+		double d1 = -1.0;
+		log.debug(String.format("The value of doubleToLongBits is %d", Double.doubleToLongBits(d1)));
+		log.debug(String.format("The value of doubleToLongBits is %016X", Double.doubleToLongBits(d1)));
+		log.debug(String.format("The value of doubleToRawLongBits is %d", Double.doubleToRawLongBits(d1)));
+		log.debug(String.format("The value of doubleToRawLongBits is %016X", Double.doubleToRawLongBits(d1)));
+		double d2 = 2.0;
+		log.debug(String.format("The value of d2 doubleToLongBits is %d", Double.doubleToLongBits(d2)));
+		log.debug(String.format("The value of d2 doubleToLongBits is %016X", Double.doubleToLongBits(d2)));
+		log.debug(String.format("The value of d2 doubleToRawLongBits is %d", Double.doubleToRawLongBits(d2)));
+		log.debug(String.format("The value of d2 doubleToRawLongBits is %016X", Double.doubleToRawLongBits(d2)));
+		double d3 = 3.0;
+		log.debug(String.format("The value of d3 doubleToLongBits is %d", Double.doubleToLongBits(d3)));
+		log.debug(String.format("The value of d3 doubleToLongBits is %016X", Double.doubleToLongBits(d3)));
+		log.debug(String.format("The value of d3 doubleToRawLongBits is %d", Double.doubleToRawLongBits(d3)));
+		log.debug(String.format("The value of d3 doubleToRawLongBits is %016X", Double.doubleToRawLongBits(d3)));
+		
+		log.debug(String.format("The value of NEGATIVE_INFINITY is %f", Double.NEGATIVE_INFINITY + 1.0));
+		log.debug(String.format("The value of POSITIVE_INFINITY is %s", Double.POSITIVE_INFINITY));
+		
+		try {
+			int i =(int) (1.0/0.0);
+			log.debug(String.format("The value of i is %d", i));
+			log.debug(String.format("The value of 1.0/0.0 is %f", 1/0.0));
+			log.debug(String.format("The value of 0.0/0.0 is %f", 0.0/0.0));
+			log.debug(String.format("The value of 0.0/0.0 is %f", 0/0.0));
+			log.debug(String.format("The value of 0.0/0.0 is %f", 0.0/0));
+//			log.debug(String.format("The value of 0.0/0.0 is %d", 0.0/0));//java.util.IllegalFormatConversionException: d != java.lang.Double
+			log.debug(String.format("The value of 0.0/0.0 is %f", 0/0));
+			log.debug(String.format("The value of 1/0 is %f", 1/0));
+		} 
+		catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+	
+	/**
+	 * 12
+	 * */
+	static void testRandomAccessFile(){
+		RandomAccessFile raf = null;
+		try {
+			raf = new RandomAccessFile("data/TestRandomAccessFile.data", "rw");
+			raf.writeLong(1l);//00 00 00 00 00 00 00 01 stored in file
+			raf.writeFloat(1.0f);//3F 80 00 00 stored in file
+			raf.writeDouble(1.0);// 3F F0 00 00 00 00 00 00 stored in file
+		} 
+		catch (FileNotFoundException e) {
+			log.error(e.getMessage(), e);
+		} 
+		catch (IOException e) {
+			log.error(e.getMessage(), e);
+		}
+		finally {
+			if (raf != null) {
+				try {
+					raf.close();
+				}
+				catch (IOException e) {
+					log.error(e.getMessage(), e);
+				}
+				finally {
+					raf = null;
+				}
+			}
+		}
 	}
 }
