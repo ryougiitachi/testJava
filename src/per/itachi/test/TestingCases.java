@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -42,65 +43,109 @@ public class TestingCases {
 	
 	private static final Formatter formatter = new Formatter();
 	
+	/**
+	 * Format: -f [parameter], ...
+	 * */
 	public static void manageTestingCases(String[] args) {
 		if (args.length <= 0) {
 			return;
 		}
 		
 		String strRegex = "[-\\+]?\\d+";
+		String strRegexOption = "\\-\\w";
+		String strRegexParam = "(\\d+)(,[-\\+]?\\w+)+";
+		String[] arrayParams = null;
+		
+		Pattern patternParam = Pattern.compile(strRegexParam);
+		Matcher matcherParam = null;
+		
+		int countMatcher;
+		
 		int iCode = 0;
-		if (Pattern.matches(strRegex, args[0])) {
-			try {
-				iCode = Integer.parseInt(args[0]);
-			} 
-			catch (NumberFormatException e) {
-				e.printStackTrace();
-				return; 
+		for (int i = 0; i < args.length; i++) {
+			if (Pattern.matches(strRegexOption, args[i])) {
+				if (i + 1 < args.length) {
+					matcherParam = patternParam.matcher(args[i + 1]);
+					if (!matcherParam.find()) {//real execution?
+						continue;
+					}
+					countMatcher = matcherParam.groupCount();
+					//parse execute code.
+					iCode = Integer.parseInt(matcherParam.group(1));
+					//parse parameters.
+					if (countMatcher >= 2) {
+//						arrayParams = new String[countMatcher - 1];
+//						for (int j = 2; j <= countMatcher; j++) {
+//							arrayParams[j - 2] = matcherParam.group(j).substring(1);
+//						}
+					}
+					arrayParams = args[i + 1].split(",");
+					switch (iCode) {
+					case 1:
+						testBasicDataTypes();
+						break;
+					case 2:
+						testByteOperation();
+						break;
+					case 3:
+						testCharset();
+						break;
+					case 4:
+						testArray();
+						break;
+					case 5:
+						testInherit();
+						break;
+					case 6:
+						testDate(arrayParams);
+						break;
+					case 7:
+						testFinal();
+						break;
+					case 8:
+						testOverflow();
+						break;
+					case 9:
+						testSearchString();
+						break;
+					case 10:
+						testBasicInfo();
+						testDouble();
+						break;
+					case 11:
+						testGenRandomPasswd();
+						break;
+					case 12:
+						testRandomAccessFile();
+						break;
+					case 13:
+						testStream();
+						break;
+					case 14:
+						testString();
+						break;
+					case 15:
+						testCodePoint();
+						break;
+					default:
+						break;
+					}
+					++i;
+					arrayParams = null;
+				}
 			}
+			
+			
 		}
-		switch (iCode) {
-		case 1:
-			testBasicDataTypes();
-			break;
-		case 2:
-			testByteOperation();
-			break;
-		case 3:
-			testCharset();
-			break;
-		case 4:
-			testArray();
-			break;
-		case 5:
-			testInherit();
-			break;
-		case 6:
-			testDate();
-			break;
-		case 7:
-			testFinal();
-			break;
-		case 8:
-			testOverflow();
-			break;
-		case 9:
-			testSearchString();
-			break;
-		case 10:
-			testBasicInfo();
-			testDouble();
-			break;
-		case 11:
-			testGenRandomPasswd();
-			break;
-		case 12:
-			testRandomAccessFile();
-		case 13:
-			testStream();
-			break;
-		default:
-			break;
-		}
+//		if (Pattern.matches(strRegex, args[0])) {
+//			try {
+//				iCode = Integer.parseInt(args[0]);
+//			} 
+//			catch (NumberFormatException e) {
+//				e.printStackTrace();
+//				return; 
+//			}
+//		}
 	}
 	
 	/**
@@ -111,7 +156,7 @@ public class TestingCases {
 		log.debug(String.format("float = %03.5f", -1.0f));
 		
 		char c = 30000;
-//		System.out.printf("char = %x\n", c);	// java.util.IllegalFormatConversionException  
+//		System.out.printf("char = %x%n", c);	// java.util.IllegalFormatConversionException  
 		log.debug(c);
 	}
 	
@@ -279,50 +324,59 @@ public class TestingCases {
 	/**
 	 * 6
 	 * */
-	protected static void testDate() {
-		DateFormat sdf = new SimpleDateFormat("GG yyyy-MM-dd HH:mm:ss", Locale.UK);
-		long ltimeBC = 0;
-		long ltimeAD = 0;
-		Date dateBC = null;
-		Date dateAD = null;
-		Date dateTemp = new Date(-62135798400000l);
+	protected static void testDate(String[] params) {
+		if (params == null || params.length <= 1) {
+			log.info("There is no more parameter.");
+			return;
+		}
+		Date dateTemp = new Date();
+		long ltime = 0;
+		DateFormat sdfDisplay = new SimpleDateFormat("GG yyyy-MM-dd HH:mm:ss", Locale.UK);
+		DateFormat sdfParsed = new SimpleDateFormat("GGyyyyMMddHHmmss", Locale.UK);
+		
+		log.debug(String.format("The value of date is %d", dateTemp.getTime()));
+		for (int i = 1; i < params.length; i++) {
+			if (params[i].startsWith("AD") || params[i].startsWith("BC")) {
+				try {
+					log.debug(String.format("The value of date is %d", sdfParsed.parse(params[i]).getTime()));
+				} 
+				catch (ParseException e) {
+					log.error(String.format("%s is not legal date format.", params[i]), e);
+				}
+			}
+			else {
+				try {
+					ltime = Long.parseLong(params[i]);
+					dateTemp.setTime(ltime);
+					log.debug(String.format("The parsed date is %s", sdfDisplay.format(dateTemp)));
+				} 
+				catch (NumberFormatException e) {
+					log.error(String.format("%s is not legal integer.", params[i]), e);
+				}
+			}
+		}
 		TimeZone tz = TimeZone.getDefault();
-		Calendar calendarAD = Calendar.getInstance();
-		GregorianCalendar gre = (GregorianCalendar)calendarAD;
+		Calendar calendar = Calendar.getInstance();
+		GregorianCalendar gre = (GregorianCalendar)calendar;
+		calendar.set(Calendar.YEAR, 2000);
+		calendar.set(Calendar.MONTH, Calendar.FEBRUARY);
+		calendar.set(Calendar.DAY_OF_MONTH, 29);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
 		log.debug(String.format("The default locale is %s", Locale.getDefault()));
 		log.debug(String.format("The default time zone is %s", tz));
 		log.debug(String.format("The default time zone class name is %s", tz.getClass()));
-		log.debug(String.format("The class name of calendar is %s", calendarAD.getClass()));
-		try {
-			dateBC = sdf.parse("BC 0001-02-29 00:00:51");
-			dateAD = sdf.parse("AD 2000-02-29 08:00:00");
-			calendarAD.setTime(dateAD);
-			calendarAD.set(Calendar.YEAR, 2000);
-			calendarAD.set(Calendar.MONTH, Calendar.FEBRUARY);
-			calendarAD.set(Calendar.DAY_OF_MONTH, 29);
-			calendarAD.set(Calendar.HOUR_OF_DAY, 0);
-			calendarAD.set(Calendar.MINUTE, 0);
-			calendarAD.set(Calendar.SECOND, 0);
-			calendarAD.set(Calendar.MILLISECOND, 0);
-			ltimeBC = dateBC.getTime();
-			ltimeAD = dateAD.getTime();
-//			ltimeAD = sdf.parse("AD 0000-00-00 00:00:00").getTime();
-			log.debug(String.format("The value of date bc is %d", ltimeBC));
-//			log.debug(String.format("The value of week bc is %d", ltimeBC));
-			log.debug(String.format("The value of date ad is %d", ltimeAD));
-			log.debug(String.format("The value of ad is %s", sdf.format(calendarAD.getTime())));
-			log.debug(String.format("The value of era ad is %d", calendarAD.get(Calendar.ERA)));
-			log.debug(String.format("The value of week ad is %d", calendarAD.get(Calendar.DAY_OF_WEEK)));
-			log.debug(String.format("The value of time zone offset ad is %d", calendarAD.get(Calendar.ZONE_OFFSET)));
-			log.debug(String.format("The value of time DST offset ad is %d", calendarAD.get(Calendar.DST_OFFSET)));
-			log.debug(String.format("The value of calendar date ad is %d", calendarAD.getTimeInMillis()));
-			log.debug(String.format("The value of dateTemp is %s", sdf.format(dateTemp)));
-			log.debug(String.format("The date of Gregorian Calendar change is %s", sdf.format(gre.getGregorianChange())));
-			log.debug(String.format("The date of Gregorian Calendar change is %d", gre.getGregorianChange().getTime()));
-		} 
-		catch (ParseException e) {
-			log.error(e.getMessage(), e);
-		}
+		log.debug(String.format("The class name of calendar is %s", calendar.getClass()));
+		log.debug(String.format("The value of is %s", sdfDisplay.format(calendar.getTime())));
+		log.debug(String.format("The value of era is %d", calendar.get(Calendar.ERA)));
+		log.debug(String.format("The value of week is %d", calendar.get(Calendar.DAY_OF_WEEK)));
+		log.debug(String.format("The value of time zone offset is %d", calendar.get(Calendar.ZONE_OFFSET)));
+		log.debug(String.format("The value of time DST offset is %d", calendar.get(Calendar.DST_OFFSET)));
+		log.debug(String.format("The value of calendar date is %d", calendar.getTimeInMillis()));
+		log.debug(String.format("The date of Gregorian Calendar change is %s", sdfParsed.format(gre.getGregorianChange())));
+		log.debug(String.format("The date of Gregorian Calendar change is %d", gre.getGregorianChange().getTime()));
 	}
 	
 	/**
@@ -641,5 +695,22 @@ public class TestingCases {
 				fis = null;
 			}
 		}
+	}
+	
+	/**
+	 * 14
+	 * */
+	static final void testString(){
+		String strComp1 = "1234367";
+		String strComp2 = "12345";
+		log.debug("strComp1:strComp2 is " + strComp1.compareTo(strComp2));
+	}
+	
+	/**
+	 * 15
+	 * */
+	static final void testCodePoint(){
+		String strTest = "…¬";
+		log.debug("The length of strTest is " + strTest.length());
 	}
 }
