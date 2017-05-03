@@ -127,6 +127,9 @@ public class TestingCases {
 					case 15:
 						testCodePoint();
 						break;
+					case 16:
+						testHashCode(arrayParams);
+						break;
 					default:
 						break;
 					}
@@ -338,7 +341,7 @@ public class TestingCases {
 		for (int i = 1; i < params.length; i++) {
 			if (params[i].startsWith("AD") || params[i].startsWith("BC")) {
 				try {
-					log.debug(String.format("The value of date is %d", sdfParsed.parse(params[i]).getTime()));
+					log.debug(String.format("The value %s of date is %d", params[i], sdfParsed.parse(params[i]).getTime()));
 				} 
 				catch (ParseException e) {
 					log.error(String.format("%s is not legal date format.", params[i]), e);
@@ -348,7 +351,7 @@ public class TestingCases {
 				try {
 					ltime = Long.parseLong(params[i]);
 					dateTemp.setTime(ltime);
-					log.debug(String.format("The parsed date is %s", sdfDisplay.format(dateTemp)));
+					log.debug(String.format("The date %s is %s", params[i], sdfDisplay.format(dateTemp)));
 				} 
 				catch (NumberFormatException e) {
 					log.error(String.format("%s is not legal integer.", params[i]), e);
@@ -712,5 +715,19 @@ public class TestingCases {
 	static final void testCodePoint(){
 		String strTest = "…¬";
 		log.debug("The length of strTest is " + strTest.length());
+	}
+	
+	/**
+	 * 16
+	 * */
+	static final void testHashCode(String[] params){
+		if (params == null || params.length <= 1) {
+			log.info("testHashCode - There is no more parameter.");
+			return;
+		}
+		for (int i = 1; i < params.length; i++) {
+			log.debug(String.format("The hash code of %s is %d 0X%08X", 
+					params[i], params[i].hashCode(), params[i].hashCode()));
+		}
 	}
 }
