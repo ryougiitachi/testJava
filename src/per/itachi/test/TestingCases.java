@@ -1,16 +1,22 @@
 package per.itachi.test;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,6 +28,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.TimeZone;
@@ -31,9 +38,14 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import per.itachi.test.algorithm.TestingSerializable;
 import per.itachi.test.inherit.TestInheritLvl1;
 import per.itachi.test.inherit.TestInheritLvl2;
 import per.itachi.test.inherit.TestInheritLvl3;
+import per.itachi.test.map.TestingHashMap;
+import per.itachi.test.map.TestingHashtable;
+import per.itachi.test.map.TestingTreeMap;
+import per.itachi.test.thread.TestingDefaultThreadPool;
 import per.itachi.test.util.StringUtil;
 
 public class TestingCases {
@@ -53,7 +65,7 @@ public class TestingCases {
 		
 		String strRegex = "[-\\+]?\\d+";
 		String strRegexOption = "\\-\\w";
-		String strRegexParam = "(\\d+)(,[-\\+]?\\w+)+";
+		String strRegexParam = "(\\d+)(,[-\\+]?\\w+)*";
 		String[] arrayParams = null;
 		
 		Pattern patternParam = Pattern.compile(strRegexParam);
@@ -130,6 +142,21 @@ public class TestingCases {
 					case 16:
 						testHashCode(arrayParams);
 						break;
+					case 17:
+						testExecCmd();
+						break;
+					case 18:
+						testJavaDefaultThreadPool(arrayParams);
+						break;
+					case 19:
+						testMap(arrayParams);
+						break;
+					case 20:
+						testSerializable(arrayParams);
+						break;
+					case 21:
+						testNet(arrayParams);
+						break;
 					default:
 						break;
 					}
@@ -159,6 +186,14 @@ public class TestingCases {
 		log.debug(String.format("float = %03.5f", -1.0f));
 		
 		char c = 30000;
+		int i = 0;
+		try {
+			i = Integer.parseInt("5.9");//java.lang.NumberFormatException occurs when it is float.
+		} 
+		catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		log.debug(String.format("int = %d", i));
 //		System.out.printf("char = %x%n", c);	// java.util.IllegalFormatConversionException  
 		log.debug(c);
 	}
@@ -287,7 +322,10 @@ public class TestingCases {
 	private static void testArray() {
 		int[] src = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 		int[] des = new int[]{0, 0, 0, 0, 0};
-		System.arraycopy(src, 0, des, 0, src.length);	//ArrayIndexOutOfBoundsException if parameter length > des.length 
+//		System.arraycopy(src, 0, des, 0, src.length);	//ArrayIndexOutOfBoundsException if parameter length > des.length 
+//		System.arraycopy(des, 0, src, 0, src.length);	//ArrayIndexOutOfBoundsException if parameter length > src.length
+		int i = 6;
+		System.arraycopy(i, 0, src, 0, 4);//ArrayStoreException 
 		log.debug(String.format("List is %s", des[4]));
 	}
 	
@@ -721,13 +759,105 @@ public class TestingCases {
 	 * 16
 	 * */
 	static final void testHashCode(String[] params){
-		if (params == null || params.length <= 1) {
-			log.info("testHashCode - There is no more parameter.");
-			return;
-		}
 		for (int i = 1; i < params.length; i++) {
 			log.debug(String.format("The hash code of %s is %d 0X%08X", 
 					params[i], params[i].hashCode(), params[i].hashCode()));
 		}
+		int []arrayInt = new int[]{1,2,3,4,5};
+		
+		//result: arrayInt.hashCode() == Objects.hashCode(arrayInt) != Arrays.hashCode(arrayInt)
+		log.debug(String.format("The value of arrayInt.hashCode() is %d 0X%08X", 
+				arrayInt.hashCode(), arrayInt.hashCode()));
+		log.debug(String.format("The value of Objects.hashCode(arrayInt) is %d 0X%08X", 
+				Objects.hashCode(arrayInt), Objects.hashCode(arrayInt)));
+		log.debug(String.format("The value of Arrays.hashCode(arrayInt) is %d 0X%08X", 
+				Arrays.hashCode(arrayInt), Arrays.hashCode(arrayInt)));
+	}
+	
+	/**
+	 * 17 
+	 * */
+	static final void testExecCmd(){
+		Process process = null;
+		int exitValue = -1;
+		BufferedReader br = null;
+		String strLine;
+		
+		try {
+			log.debug(String.format("Starting... "));
+			process = Runtime.getRuntime().exec("cmd /k sh\\sleep.bat");//timeout 30 /nobreak
+			br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			while ( (strLine=br.readLine()) != null ) {
+				log.debug(strLine);
+			}
+//			exitValue = process.waitFor();
+			log.debug(String.format("The hashcode of process is %s", process));
+			log.debug(String.format("The exit value of process is %d", exitValue));
+		} 
+		catch (IOException e) {
+			log.error(e.getMessage(), e);
+		}
+//		catch (InterruptedException e) {
+//			log.error(e.getMessage(), e);
+//		}
+		finally {
+			if (br != null) {
+				try {
+					br.close();
+				} 
+				catch (IOException e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 18
+	 * @param	param01	number of threads
+	 * */
+	static final void testJavaDefaultThreadPool(String[] params) {
+		TestingDefaultThreadPool.test(params);
+	}
+	
+	/**
+	 * 19
+	 * */
+	static final void testMap(String[] params) {
+		TestingTreeMap.test(params);
+		TestingHashMap.test(params);
+		TestingHashtable.test(params);
+	}
+	
+	/**
+	 * 20
+	 * */
+	static final void testSerializable(String[] params) {
+		ObjectStreamClass oscl = ObjectStreamClass.lookup(TestingSerializable.class);
+		//ObjectStreamClass.getSerialVersionUID if there is a uid, then return. 
+		//if there is no uid, then calculate. 
+		log.debug("The serialVersionUID of TestingSerializable is " + oscl.getSerialVersionUID());
+	}
+	
+	/**
+	 * 21
+	 * */
+	static final void testNet(String[] params) {
+		InetAddress addrLocal = null;
+		InetAddress addrLoopback = null;
+		InetAddress addrRemote = null;
+		InetAddress addrName = null;
+		try {
+			addrLocal = InetAddress.getLocalHost();
+			addrLoopback = InetAddress.getLoopbackAddress();
+			addrName = InetAddress.getByName("127.0.0.1");
+		} 
+		catch (UnknownHostException e) {
+			log.debug(e.getMessage(), e);
+		}
+		log.debug(MessageFormat.format("{0}", addrLocal));
+		log.debug(MessageFormat.format("{0}", addrLoopback));
+		log.debug(MessageFormat.format("{0}", addrRemote));
+		log.debug(MessageFormat.format("{0}", addrName));
 	}
 }
