@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -105,10 +104,16 @@ public class TestingCases {
 	public static void testBasicDataTypes() {
 		log.debug(String.format("long = %d", -123456789123l));
 		log.debug(String.format("float = %03.5f", -1.0f));
-		
-		char c = 30000;
+		String strTest = "–T";
+//		int iChar = strTest.c;
+		char c = 26404;
 //		System.out.printf("char = %x\n", c);	// java.util.IllegalFormatConversionException  
+		log.debug("The length of strTest is " + strTest.length());
+		log.debug(String.format("The length of strTest is %d", (int)strTest.charAt(0)));
 		log.debug(c);
+		log.debug("Before 1970 is " + (((365 * 1969 + 1969 / 4) - 1969 / 100) + 1969 / 400));
+		log.debug("The max value of long is " + Long.MAX_VALUE);
+		log.debug("The min value of long is " + Long.MIN_VALUE);
 	}
 	
 	/**
@@ -283,20 +288,20 @@ public class TestingCases {
 		Date dateAD = null;
 		Date dateTemp = new Date(-62135798400000l);
 		TimeZone tz = TimeZone.getDefault();
-		Calendar calendarAD = Calendar.getInstance();
-		GregorianCalendar gre = (GregorianCalendar)calendarAD;
+		per.itachi.test.algorithm.Calendar calendarAD = per.itachi.test.algorithm.Calendar.getInstance();
+		per.itachi.test.algorithm.GregorianCalendar gre = (per.itachi.test.algorithm.GregorianCalendar)calendarAD;
 		log.debug(String.format("The default locale is %s", Locale.getDefault()));
 		log.debug(String.format("The default time zone is %s", tz));
 		log.debug(String.format("The default time zone class name is %s", tz.getClass()));
 		log.debug(String.format("The class name of calendar is %s", calendarAD.getClass()));
 		try {
 			dateBC = sdf.parse("BC 0001-02-29 00:00:51");
-			dateAD = sdf.parse("AD 2000-02-29 08:00:00");
-			calendarAD.setTime(dateAD);
-			calendarAD.set(Calendar.YEAR, 2000);
-			calendarAD.set(Calendar.MONTH, Calendar.FEBRUARY);
-			calendarAD.set(Calendar.DAY_OF_MONTH, 29);
-			calendarAD.set(Calendar.HOUR_OF_DAY, 0);
+			dateAD = sdf.parse("AD 0001-01-01 08:00:00");
+//			calendarAD.setTime(dateAD);
+			calendarAD.set(Calendar.YEAR, -50);
+			calendarAD.set(Calendar.MONTH, Calendar.JANUARY);
+			calendarAD.set(Calendar.DAY_OF_MONTH, 1);
+			calendarAD.set(Calendar.HOUR_OF_DAY, 8);
 			calendarAD.set(Calendar.MINUTE, 0);
 			calendarAD.set(Calendar.SECOND, 0);
 			calendarAD.set(Calendar.MILLISECOND, 0);
@@ -311,10 +316,23 @@ public class TestingCases {
 			log.debug(String.format("The value of week ad is %d", calendarAD.get(Calendar.DAY_OF_WEEK)));
 			log.debug(String.format("The value of time zone offset ad is %d", calendarAD.get(Calendar.ZONE_OFFSET)));
 			log.debug(String.format("The value of time DST offset ad is %d", calendarAD.get(Calendar.DST_OFFSET)));
-			log.debug(String.format("The value of calendar date ad is %d", calendarAD.getTimeInMillis()));
+			log.debug(String.format("The value of calendar millisec ad is %d", calendarAD.getTimeInMillis()));
 			log.debug(String.format("The value of dateTemp is %s", sdf.format(dateTemp)));
 			log.debug(String.format("The date of Gregorian Calendar change is %s", sdf.format(gre.getGregorianChange())));
 			log.debug(String.format("The date of Gregorian Calendar change is %d", gre.getGregorianChange().getTime()));
+			log.debug("The leap year for 1900 is " + gre.isLeapYear(1900));
+			
+			calendarAD.set(Calendar.YEAR, 1582);
+			calendarAD.set(Calendar.MONTH, Calendar.OCTOBER);
+			calendarAD.set(Calendar.HOUR_OF_DAY, 8);
+			calendarAD.set(Calendar.MINUTE, 0);
+			calendarAD.set(Calendar.SECOND, 0);
+			calendarAD.set(Calendar.MILLISECOND, 0);
+//			for(int i=3; i <= 25; ++i) {
+//				calendarAD.set(Calendar.DAY_OF_MONTH, i);
+//				log.debug(String.format("The cutover of gregory is %s", sdf.format(calendarAD.getTime())));
+//				log.debug(String.format("The cutover of gregory millisec ad is %d", calendarAD.getTimeInMillis()));
+//			}
 		} 
 		catch (ParseException e) {
 			log.error(e.getMessage(), e);
