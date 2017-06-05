@@ -10,7 +10,10 @@ public class EntryTesting {
 	 * 		-Dcommons.logging.configuration=etc/commons-logging.properties 
 	 * 		-Dlog4j.configuration=file:etc/log4j.properties
 	 * 		-Djava.util.logging.config.file=etc/jdk-logging.properties
-	 * And actually, commons.logging.configuration is an invalid argument. 
+	 * And actually, commons.logging.configuration is an invalid argument. <br></br>
+	 * 
+	 * If both slf4j and commons-logging exist, slf4j seems to have higher priority?
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
