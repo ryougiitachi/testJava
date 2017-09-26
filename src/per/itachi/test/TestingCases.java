@@ -295,7 +295,7 @@ public class TestingCases {
 		log.debug(String.format("The class name of calendar is %s", calendarAD.getClass()));
 		try {
 			dateBC = sdf.parse("BC 0001-02-29 00:00:51");
-			dateAD = sdf.parse("AD 2000-02-29 08:00:00");
+			dateAD = sdf.parse("AD 1970-01-03 08:00:00");
 			calendarAD.setTime(dateAD);
 			calendarAD.set(Calendar.YEAR, 2000);
 			calendarAD.set(Calendar.MONTH, Calendar.FEBRUARY);
