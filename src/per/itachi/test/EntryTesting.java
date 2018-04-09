@@ -3,8 +3,13 @@ package per.itachi.test;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class EntryTesting {
 
+	private static final Log log = LogFactory.getLog(EntryTesting.class);
+	
 	/**
 	 * VM arguments: 
 	 * 		-Dcommons.logging.configuration=etc/commons-logging.properties 
@@ -17,6 +22,12 @@ public class EntryTesting {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		try {
+			Thread.sleep(0);//run immediately, instead of unlimited waiting.
+		} 
+		catch (InterruptedException e) {
+			log.error(e.getMessage(), e);
+		}
 		if (args.length >= 1) {
 			TestingCases.manageTestingCases(args);
 		}
@@ -25,19 +36,19 @@ public class EntryTesting {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			} 
 			catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 				System.exit(-1);
 			} 
 			catch (InstantiationException e) {
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 				System.exit(-2);
 			} 
 			catch (IllegalAccessException e) {
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 				System.exit(-3);
 			} 
 			catch (UnsupportedLookAndFeelException e) {
-				e.printStackTrace();
+				log.error(e.getMessage(), e);
 				System.exit(-4);
 			}
 		}

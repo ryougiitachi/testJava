@@ -2,12 +2,6 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
 	
-	<root>
-		<priority value="debug" />
-		<appender-ref ref="stdout" />
-		<appender-ref ref="DAILY" />
-	</root>
-	
 	<!-- 输出日志到控制台  ConsoleAppender -->
 	<appender name="stdout" class="org.apache.log4j.ConsoleAppender">
 		<param name="Threshold" value="DEBUG"></param>
@@ -19,12 +13,12 @@
 	<!-- 输出日志到文件  每天一个文件 -->
 	<appender name="DAILY" 
 			class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="Threshold" value="info"></param>
+		<param name="Threshold" value="DEBUG"></param><!-- info -->
 		<param name="ImmediateFlush" value="true"></param>
 		<param name="File" value="log/test_log.txt"></param>
 		<param name="DatePattern" value="'.'yyyy-MM-dd'.log'"></param>
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss\} %-5p] [%t] {%c:%L}-%m%n"></param>
+			<param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss\}] [%-5p] [%t] {%c:%L} -%m%n"></param>
 		</layout>
 	</appender>
 	
@@ -56,5 +50,11 @@
 		定义全局的日志输出级别,但是在输出目的地的配置中配置的具体输出级别优先级高于全局定义的优先级。  
 		如果在railyFile中定义<param name="Threshold" value="info"></param>，那么将会把info以上级别的信息输出  
 	 -->
+	
+	<root>
+		<priority value="debug" /><!-- case-insensitive -->
+		<appender-ref ref="stdout" />
+		<appender-ref ref="DAILY" /><!-- case-sensitive -->
+	</root>
 
 </log4j:configuration>

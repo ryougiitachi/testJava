@@ -15,22 +15,26 @@ import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Base64.Decoder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -157,6 +161,12 @@ public class TestingCases {
 					case 21:
 						testNet(arrayParams);
 						break;
+					case 22:
+						testBase64Decoder(arrayParams);
+						break;
+					case 23:
+						testCollection(arrayParams);
+						break;
 					default:
 						break;
 					}
@@ -194,7 +204,7 @@ public class TestingCases {
 		try {
 			i = Integer.parseInt("5.9");//java.lang.NumberFormatException occurs when it is float.
 		} 
-		catch (Exception e) {
+		catch (NumberFormatException e) {
 			log.error(e.getMessage(), e);
 		}
 		log.debug(String.format("int = %d", i));
@@ -203,6 +213,19 @@ public class TestingCases {
 		log.debug("Before 1970 is " + (((365 * 1969 + 1969 / 4) - 1969 / 100) + 1969 / 400));
 		log.debug("The max value of long is " + Long.MAX_VALUE);
 		log.debug("The min value of long is " + Long.MIN_VALUE);
+		
+		Integer integer = 1;
+		log.debug("The address of integer is " + System.identityHashCode(integer) + ", and value is " + integer);
+		++integer;
+		log.debug("The address of integer is " + System.identityHashCode(integer) + ", and value is " + integer);
+		double d = 267569.0 / 4999.0;
+		log.debug(Math.ceil(.1));
+		log.debug(Math.floor(.1));
+		log.debug(d);
+		
+		Object obj = new Object();
+		log.debug("The instance of object is " + obj.toString());
+		log.debug("The class of object is " + Object.class);
 	}
 	
 	/**
@@ -314,13 +337,27 @@ public class TestingCases {
 	 * 3
 	 * */
 	public static void testCharset() {
-		Map<String, Charset> mapCharsets = Charset.availableCharsets();
+		SortedMap<String, Charset> mapCharsets = Charset.availableCharsets();
 		log.debug(String.format("Determine whether or not to support charset is %s", mapCharsets.getClass()));
 		log.debug(String.format("Determine whether or not to support charset is %s", Charset.isSupported("utf8")));
 		log.debug(String.format("Determine whether or not to support charset is %s", mapCharsets.get("utf8")));
 		log.debug(String.format("Determine whether or not to support charset is %s", mapCharsets.get("utf-8")));
 		log.debug(String.format("Determine whether or not to support charset is %s", mapCharsets.get("UTF-8")));
 		log.debug(String.format("The default charset is %s", Charset.defaultCharset()));
+		Charset charset = null;
+		Set<String> aliases = null;
+		Set<String> keys = mapCharsets.keySet();
+		StringBuilder builder = new StringBuilder();
+		for(String strKey: keys) {
+			charset = mapCharsets.get(strKey);
+			aliases = charset.aliases();
+			log.debug(String.format("The %s is %s", strKey, charset));
+			for(String strAlias: aliases) {
+				builder.append(strAlias).append(" / ");
+			}
+			log.debug(String.format("The alias of %s is %s", strKey, builder));
+			builder.setLength(0);
+		}
 	}
 	
 	/**
@@ -332,8 +369,10 @@ public class TestingCases {
 //		System.arraycopy(src, 0, des, 0, src.length);	//ArrayIndexOutOfBoundsException if parameter length > des.length 
 //		System.arraycopy(des, 0, src, 0, src.length);	//ArrayIndexOutOfBoundsException if parameter length > src.length
 		int i = 6;
-		System.arraycopy(i, 0, src, 0, 4);//ArrayStoreException 
+///		System.arraycopy(i, 0, src, 0, 4);//ArrayStoreException 
 		log.debug(String.format("List is %s", des[4]));
+		Object[] arrObj = new Object[]{new Integer(1), new String("foo"), new Boolean(true)};
+		Arrays.sort(arrObj);//java.lang.ClassCastException: java.lang.Integer cannot be cast to java.lang.String
 	}
 	
 	/**
@@ -406,9 +445,10 @@ public class TestingCases {
 		TimeZone tz = TimeZone.getDefault();
 		Calendar calendar = Calendar.getInstance();
 		GregorianCalendar gre = (GregorianCalendar)calendar;
-		calendar.set(Calendar.YEAR, 2000);
-		calendar.set(Calendar.MONTH, Calendar.FEBRUARY);
-		calendar.set(Calendar.DAY_OF_MONTH, 29);
+		calendar.set(Calendar.YEAR, 2017);
+		calendar.set(Calendar.MONTH, Calendar.OCTOBER);
+		calendar.set(Calendar.DAY_OF_MONTH, 21);
+		calendar.add(Calendar.DAY_OF_MONTH, 21);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
 		calendar.set(Calendar.SECOND, 0);
@@ -425,6 +465,7 @@ public class TestingCases {
 		log.debug(String.format("The value of calendar date is %d", calendar.getTimeInMillis()));
 		log.debug(String.format("The date of Gregorian Calendar change is %s", sdfParsed.format(gre.getGregorianChange())));
 		log.debug(String.format("The date of Gregorian Calendar change is %d", gre.getGregorianChange().getTime()));
+		log.debug(String.format("The date of specific Calendar is %s", sdfParsed.format(calendar.getTime())));
 	}
 	
 	/**
@@ -866,5 +907,38 @@ public class TestingCases {
 		log.debug(MessageFormat.format("{0}", addrLoopback));
 		log.debug(MessageFormat.format("{0}", addrRemote));
 		log.debug(MessageFormat.format("{0}", addrName));
+	}
+	
+	/**
+	 * 22
+	 * */
+	static final void testBase64Decoder (String[] params) {
+		if (params.length < 2) {
+			return;
+		}
+		Charset charset = null;
+		charset = Charset.forName("acsii");
+		byte[] byteData = null;
+		String strDecoded = null;
+		Decoder decoder = Base64.getDecoder();
+		for (int i = 1, length = params.length; i < length; i++) {
+			log.debug("The raw Base64 is " + params[i]);
+			byteData = decoder.decode(params[i]);
+			strDecoded = new String(byteData, charset);
+			log.debug(params[i] + " means " + strDecoded);
+		}
+	}
+	
+	/**
+	 * 23
+	 * */
+	static final void testCollection (String[] params) {
+//		int i;
+//		System.out.println(i);//A compiler error will be reported here.
+		List<String> list = null;
+		for (String item : list) {
+			log.debug("");
+		}
+		log.debug("No error");
 	}
 }
