@@ -444,28 +444,34 @@ public class TestingCases {
 		}
 		TimeZone tz = TimeZone.getDefault();
 		Calendar calendar = Calendar.getInstance();
-		GregorianCalendar gre = (GregorianCalendar)calendar;
-		calendar.set(Calendar.YEAR, 2017);
-		calendar.set(Calendar.MONTH, Calendar.OCTOBER);
-		calendar.set(Calendar.DAY_OF_MONTH, 21);
-		calendar.add(Calendar.DAY_OF_MONTH, 21);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		log.debug(String.format("The default locale is %s", Locale.getDefault()));
-		log.debug(String.format("The default time zone is %s", tz));
-		log.debug(String.format("The default time zone class name is %s", tz.getClass()));
-		log.debug(String.format("The class name of calendar is %s", calendar.getClass()));
-		log.debug(String.format("The value of is %s", sdfDisplay.format(calendar.getTime())));
-		log.debug(String.format("The value of era is %d", calendar.get(Calendar.ERA)));
-		log.debug(String.format("The value of week is %d", calendar.get(Calendar.DAY_OF_WEEK)));
-		log.debug(String.format("The value of time zone offset is %d", calendar.get(Calendar.ZONE_OFFSET)));
-		log.debug(String.format("The value of time DST offset is %d", calendar.get(Calendar.DST_OFFSET)));
-		log.debug(String.format("The value of calendar date is %d", calendar.getTimeInMillis()));
-		log.debug(String.format("The date of Gregorian Calendar change is %s", sdfParsed.format(gre.getGregorianChange())));
-		log.debug(String.format("The date of Gregorian Calendar change is %d", gre.getGregorianChange().getTime()));
-		log.debug(String.format("The date of specific Calendar is %s", sdfParsed.format(calendar.getTime())));
+		try {
+			calendar.setTime(sdfParsed.parse(params[1]));
+			GregorianCalendar gre = (GregorianCalendar)calendar;
+//			calendar.set(Calendar.YEAR, 2017);
+//			calendar.set(Calendar.MONTH, Calendar.OCTOBER);
+//			calendar.set(Calendar.DAY_OF_MONTH, 21);
+			calendar.add(Calendar.MONTH, -1);
+			calendar.set(Calendar.HOUR_OF_DAY, 0);
+			calendar.set(Calendar.MINUTE, 0);
+			calendar.set(Calendar.SECOND, 0);
+			calendar.set(Calendar.MILLISECOND, 0);
+			log.debug(String.format("The default locale is %s", Locale.getDefault()));
+			log.debug(String.format("The default time zone is %s", tz));
+			log.debug(String.format("The default time zone class name is %s", tz.getClass()));
+			log.debug(String.format("The class name of calendar is %s", calendar.getClass()));
+			log.debug(String.format("The value of is %s", sdfDisplay.format(calendar.getTime())));
+			log.debug(String.format("The value of era is %d", calendar.get(Calendar.ERA)));
+			log.debug(String.format("The value of week is %d", calendar.get(Calendar.DAY_OF_WEEK)));
+			log.debug(String.format("The value of time zone offset is %d", calendar.get(Calendar.ZONE_OFFSET)));
+			log.debug(String.format("The value of time DST offset is %d", calendar.get(Calendar.DST_OFFSET)));
+			log.debug(String.format("The value of calendar date is %d", calendar.getTimeInMillis()));
+			log.debug(String.format("The date of Gregorian Calendar change is %s", sdfParsed.format(gre.getGregorianChange())));
+			log.debug(String.format("The date of Gregorian Calendar change is %d", gre.getGregorianChange().getTime()));
+			log.debug(String.format("The date of specific Calendar is %s", sdfParsed.format(calendar.getTime())));
+		} 
+		catch (ParseException e) {
+			log.error(e.getMessage(), e);
+		}
 	}
 	
 	/**
@@ -936,6 +942,7 @@ public class TestingCases {
 //		int i;
 //		System.out.println(i);//A compiler error will be reported here.
 		List<String> list = null;
+		// NullPointerException will be thrown when iterating list with null using for-each. 
 		for (String item : list) {
 			log.debug("");
 		}
